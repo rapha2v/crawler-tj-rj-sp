@@ -19,7 +19,7 @@ function replaceTagHTML(tag) {
 function zipArrays(date, news, content, uri, url) {
     let arr = [];
     for (let i = 0; i < date.length; i++) {
-        arr.push({ "data": date[i], "noticia": news[i], "conteudo": content[i], "link": `${url.slice(0, -1)}${uri[i]}` });//PREENCHENDO ARRAY NOTÍCIAS COM OS DADOS DOS ARRAYS CITADOS ACIMA, ATRAVÉS DO MÉTODO PUSH()
+        arr.push({ "data": date[i], "titulo": news[i], "conteudo": content[i], "link": `${url.slice(0, -1)}${uri[i]}` });//PREENCHENDO ARRAY NOTÍCIAS COM OS DADOS DOS ARRAYS CITADOS ACIMA, ATRAVÉS DO MÉTODO PUSH()
 
     }
     return arr;
