@@ -1,6 +1,7 @@
 const custom = require('../custom');
 const cheerio = require('cheerio');
 const moment = require('moment');
+const mongoose = require('mongoose');
 
 const TJRJ_BASE_URL = "http://www.tjrj.jus.br/";
 const NOTICE_BASE_URI = "web/guest/noticias?p_p_id=com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_lFJyjb7iMZVO&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_lFJyjb7iMZVO_delta=20&p_r_p_resetCur=false&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_lFJyjb7iMZVO_cur=1";
@@ -111,7 +112,7 @@ class TJRJController {
                     imagens.push(img.attribs.src.trim());
                 });
                 const conteudo = {
-                    "imagens": Object.assign({}, imagens),
+                    "imagens": imagens,
                     "texto": texto
                 };
                 return conteudo;

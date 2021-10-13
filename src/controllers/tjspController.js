@@ -92,7 +92,7 @@ class TJSPController {
                     imagens.push(img.attribs.src.trim());
                 });
                 const conteudo = {
-                    "imagens": Object.assign({}, imagens),
+                    "imagens": imagens,
                     "texto": texto
                 };
                 return conteudo;
