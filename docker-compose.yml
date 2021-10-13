@@ -2,21 +2,19 @@ version: '3' #definindo qual a versão do docker vamos utilizar
 
 services: 
   app:
+    container_name: app
+    restart: always
     build: . # . significa que a dockerfile vai estar na pasta raiz do nosso projeto
-    command: npm start # comando que vamos utilizar para iniciar a aplicação
     ports:
       - '3000:3000' # a porta que a aplicação vai rodar
+    links:
+      - mongo
     volumes:
       - .:/usr/app # a pasta que vamos monitorar
 
 
-  db:
-    image: mongo:4.2
-    container_name: db
-    restart: always
+  mongo:
+    container_name: mongodb
+    image: mongo
     ports:
-      - 27017:27017
-    environment:
-        MONGO_INITDB_DATABASE:
-        MONGO_INITDB_ROOT_USERNAME:
-        MONGO_INITDB_ROOT_PASSWORD:
+      - '27018:27017'
