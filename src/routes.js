@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const moment = require('moment');
+const mongoose = require('mongoose');
 
 //IMPORTANDO CONTROLLERS DAS ROTAS
 const TJRJController = require('./controllers/tjrjController');
 const TJSPController = require('./controllers/tjspController');
 const newsTjFromDateController = require('./controllers/newsTjFromDateController');
 
-router.get('/', (req, res) => {
-    res.send("servidor rodando.");
+router.get('/', async (req, res) => {
+        res.send("Servidor rodando!");
 });
 
 //AÇÕES DAS ROTAS DO TRIBUNAL DE JUSTIÇA RIO DE JANEIRO

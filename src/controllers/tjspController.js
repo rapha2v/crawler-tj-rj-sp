@@ -1,6 +1,9 @@
 const custom = require('../custom');
 const cheerio = require('cheerio');
 const moment = require('moment');
+const mongoose = require('mongoose');
+const newsModel = require('../Model/News');
+const news = mongoose.model("NoticiasSP", newsModel, "NoticiasSP");
 
 const TJSP_BASE_URL = "https://www.tjsp.jus.br/";
 const NOTICE_BASE_URI = "noticias"
@@ -26,6 +29,19 @@ class TJSPController {
     }
     static async getNoticias(req, res) {
         const jsonSP = await TJSPController.getJsonNewsSP();
+        const n = new news(jsonSP);
+        news.find({'fonte': "tjsp"}, (err, data) => {
+            if(err){
+                console.log(err.message);
+                return;
+            }
+            if(data.length){
+                news.deleteMany({});
+                n.save();
+            }else{
+                n.save();
+            }
+        });
         res.send(jsonSP);
     }
     static async getJsonNewsSP() {

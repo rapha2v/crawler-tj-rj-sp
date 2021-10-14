@@ -2,6 +2,9 @@ const custom = require('../custom');
 const cheerio = require('cheerio');
 const moment = require('moment');
 const mongoose = require('mongoose');
+const newsModel = require('../Model/News');
+const news = mongoose.model("NoticiasRJ", newsModel, "NoticiasRJ");
+
 
 const TJRJ_BASE_URL = "http://www.tjrj.jus.br/";
 const NOTICE_BASE_URI = "web/guest/noticias?p_p_id=com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_lFJyjb7iMZVO&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_lFJyjb7iMZVO_delta=20&p_r_p_resetCur=false&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_lFJyjb7iMZVO_cur=1";
@@ -27,6 +30,19 @@ class TJRJController {
     }
     static async getNoticias(req, res) {
         const jsonRJ = await TJRJController.getNewsJsonRJ();
+        const n = new news(jsonRJ);
+        news.find({'fonte': "tjrj"}, (err, data) => {
+            if(err){
+                console.log(err.message);
+                return;
+            }
+            if(data.length){
+                news.deleteMany({});
+                n.save();
+            }else{
+                n.save();
+            }
+        });
         res.send(jsonRJ);
     }
     static async getNewsJsonRJ() {
