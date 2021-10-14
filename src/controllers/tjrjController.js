@@ -21,8 +21,8 @@ class TJRJController {
         } catch (err) {
             res.status(500).json({
                 status: 500,
-                message: "Internal error"
-            })
+                message: `Internal error: ${err.message}.`
+            });
         }
     }
     static async getNoticias(req, res) {
@@ -79,7 +79,7 @@ class TJRJController {
         } catch (err) {
             const json = {
                 status: 500,
-                message: "Internal error"
+                message: `Internal error: ${err.message}.`
             };
             return json;
         }

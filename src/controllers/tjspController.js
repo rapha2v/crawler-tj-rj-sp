@@ -52,7 +52,13 @@ class TJSPController {
 
                 noticias = custom.zipArrays(date, titulo, conteudo, uri, TJSP_BASE_URL);
 
-                return noticias;
+                const json = {
+                    "success": true,
+                    "fonte": "tjsp",
+                    "noticias": noticias
+                };
+                
+                return json;
             } else {
                 const json = {
                     status: status,
