@@ -6,45 +6,35 @@ const newsModel = require('../Model/News');
 const news = mongoose.model("NoticiasSP", newsModel, "NoticiasSP");
 
 const TJSP_BASE_URL = "https://www.tjsp.jus.br/";
-const NOTICE_BASE_URI = "noticias"
+const NOTICE_BASE_URI = "noticias?pagina=2"
 
 class TJSPController {
     static async getNoticias() {
         const jsonSP = await TJSPController.getJsonNewsSP();
         const n = new news(jsonSP);
-        try{
+        try {
             news.find({ 'fonte': "tjsp" }, (err, data) => {
                 if (err) {
                     console.log(err.message);
                     return;
                 }
                 if (data.length) {
-                    news.find({ 'fonte': "tjsp" }, (err, data) => {
-                        if (err) {
-                            console.log(err.message);
-                            return;
+                    const tituloArr = [];
+                    for (let noticia of data[0].noticias) {
+                        tituloArr.push(noticia.titulo);
+                    }
+                    for (let noticia of jsonSP.noticias) {
+                        if (!tituloArr.includes(noticia.titulo)) {
+                            data[0].noticias.push(noticia);
                         }
-                        if (data.length) {
-                            const tituloArr = [];
-                            for (let noticia of data[0].noticias) {
-                                tituloArr.push(noticia.titulo);
-                            }
-                            for (let noticia of jsonSP.noticias) {
-                                if (!tituloArr.includes(noticia.titulo)) {
-                                    data[0].noticias.push(noticia);
-                                    data[0].save();
-                                }
-                            }
-                        } else {
-                            n.save();
-                        }
-                    });
+                    }
+                    data[0].save();
                 } else {
                     n.save();
                 }
             });
             console.log("Dados SP atualizados com sucesso!");
-        }catch(err){
+        } catch (err) {
             console.log(`Erro na atualização de dados SP: ${err.message}`)
         }
     }
@@ -77,7 +67,7 @@ class TJSPController {
                     "fonte": "tjsp",
                     "noticias": noticias
                 };
-                
+
                 return json;
             } else {
                 const json = {

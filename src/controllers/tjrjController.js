@@ -7,45 +7,35 @@ const news = mongoose.model("NoticiasRJ", newsModel, "NoticiasRJ");
 
 
 const TJRJ_BASE_URL = "http://www.tjrj.jus.br/";
-const NOTICE_BASE_URI = "web/guest/noticias?p_p_id=com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_lFJyjb7iMZVO&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_lFJyjb7iMZVO_delta=20&p_r_p_resetCur=false&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_lFJyjb7iMZVO_cur=1";
+const NOTICE_BASE_URI = "web/guest/noticias?p_p_id=com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_lFJyjb7iMZVO&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_lFJyjb7iMZVO_delta=20&p_r_p_resetCur=false&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_lFJyjb7iMZVO_cur=3";
 
 class TJRJController {
     static async getNoticias() {
         const jsonRJ = await TJRJController.getNewsJsonRJ();
         const n = new news(jsonRJ);
-        try{
+        try {
             news.find({ 'fonte': "tjrj" }, (err, data) => {
                 if (err) {
                     console.log(err.message);
                     return;
                 }
                 if (data.length) {
-                    news.find({ 'fonte': "tjrj" }, (err, data) => {
-                        if (err) {
-                            console.log(err.message);
-                            return;
+                    const tituloArr = [];
+                    for (let noticia of data[0].noticias) {
+                        tituloArr.push(noticia.titulo);
+                    }
+                    for (let noticia of jsonRJ.noticias) {
+                        if (!tituloArr.includes(noticia.titulo)) {
+                            data[0].noticias.push(noticia);
                         }
-                        if (data.length) {
-                            const tituloArr = [];
-                            for (let noticia of data[0].noticias) {
-                                tituloArr.push(noticia.titulo);
-                            }
-                            for (let noticia of jsonRJ.noticias) {
-                                if (!tituloArr.includes(noticia.titulo)) {
-                                    data[0].noticias.push(noticia);
-                                    data[0].save();
-                                }
-                            }
-                        } else {
-                            n.save();
-                        }
-                    });
+                    }
+                    data[0].save();
                 } else {
                     n.save();
                 }
             });
             console.log("Dados RJ atualizados com sucesso!");
-        }catch(err){
+        } catch (err) {
             console.log(`Erro na atualização de dados RJ: ${err.message}`)
         }
     }
