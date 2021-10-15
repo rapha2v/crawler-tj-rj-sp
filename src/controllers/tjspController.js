@@ -6,7 +6,7 @@ const newsModel = require('../Model/News');
 const news = mongoose.model("NoticiasSP", newsModel, "NoticiasSP");
 
 const TJSP_BASE_URL = "https://www.tjsp.jus.br/";
-const NOTICE_BASE_URI = "noticias?pagina=2"
+const NOTICE_BASE_URI = "noticias"
 
 class TJSPController {
     static async getNoticias() {
