@@ -36,7 +36,10 @@ cron.schedule('*/30 * * * *', async () => {
 });
 
 const PORT = 3000;
-app.listen(PORT, (err) => {
+app.listen(PORT, async (err) => {
     if(err) throw new Error(`Houve um erro na inicialização: ${err.message}`);
     else console.log("Servidor iniciado com sucesso!");
+
+    await TJRJController.getNoticias();
+    await TJSPController.getNoticias();
 });
