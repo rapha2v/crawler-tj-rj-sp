@@ -9,40 +9,44 @@ const TJSP_BASE_URL = "https://www.tjsp.jus.br/";
 const NOTICE_BASE_URI = "noticias"
 
 class TJSPController {
-    static async getOnline(req, res) {
-        try {
-            const { status } = await custom.connAxios(TJSP_BASE_URL + NOTICE_BASE_URI);
-            if (status == 200) {
-                res.redirect('/tjsp/noticias');
-            } else {
-                res.status(status).json({
-                    status: status,
-                    message: "Houve algum erro na localização dos dados.",
-                });
-            }
-        } catch (err) {
-            res.status(500).json({
-                status: 500,
-                message: "Internal error"
-            })
-        }
-    }
-    static async getNoticias(req, res) {
+    static async getNoticias() {
         const jsonSP = await TJSPController.getJsonNewsSP();
         const n = new news(jsonSP);
-        news.find({'fonte': "tjsp"}, (err, data) => {
-            if(err){
-                console.log(err.message);
-                return;
-            }
-            if(data.length){
-                news.deleteMany({});
-                n.save();
-            }else{
-                n.save();
-            }
-        });
-        res.send(jsonSP);
+        try{
+            news.find({ 'fonte': "tjsp" }, (err, data) => {
+                if (err) {
+                    console.log(err.message);
+                    return;
+                }
+                if (data.length) {
+                    news.find({ 'fonte': "tjsp" }, (err, data) => {
+                        if (err) {
+                            console.log(err.message);
+                            return;
+                        }
+                        if (data.length) {
+                            const tituloArr = [];
+                            for (let noticia of data[0].noticias) {
+                                tituloArr.push(noticia.titulo);
+                            }
+                            for (let noticia of jsonSP.noticias) {
+                                if (!tituloArr.includes(noticia.titulo)) {
+                                    data[0].noticias.push(noticia);
+                                    data[0].save();
+                                }
+                            }
+                        } else {
+                            n.save();
+                        }
+                    });
+                } else {
+                    n.save();
+                }
+            });
+            console.log("Dados SP atualizados com sucesso!");
+        }catch(err){
+            console.log(`Erro na atualização de dados SP: ${err.message}`)
+        }
     }
     static async getJsonNewsSP() {
         try {

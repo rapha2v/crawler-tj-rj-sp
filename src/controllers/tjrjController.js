@@ -10,45 +10,49 @@ const TJRJ_BASE_URL = "http://www.tjrj.jus.br/";
 const NOTICE_BASE_URI = "web/guest/noticias?p_p_id=com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_lFJyjb7iMZVO&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_lFJyjb7iMZVO_delta=20&p_r_p_resetCur=false&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_lFJyjb7iMZVO_cur=1";
 
 class TJRJController {
-    static async getOnline(req, res) {
-        try {
-            const { status } = await custom.connAxios(TJRJ_BASE_URL + NOTICE_BASE_URI);
-            if (status == 200) {
-                res.redirect('/tjrj/noticias');
-            } else {
-                res.status(status).json({
-                    status: status,
-                    message: "Erro na recuperação dos dados.",
-                });
-            }
-        } catch (err) {
-            res.status(500).json({
-                status: 500,
-                message: `Internal error: ${err.message}.`
-            });
-        }
-    }
-    static async getNoticias(req, res) {
+    static async getNoticias() {
         const jsonRJ = await TJRJController.getNewsJsonRJ();
         const n = new news(jsonRJ);
-        news.find({'fonte': "tjrj"}, (err, data) => {
-            if(err){
-                console.log(err.message);
-                return;
-            }
-            if(data.length){
-                news.deleteMany({});
-                n.save();
-            }else{
-                n.save();
-            }
-        });
-        res.send(jsonRJ);
+        try{
+            news.find({ 'fonte': "tjrj" }, (err, data) => {
+                if (err) {
+                    console.log(err.message);
+                    return;
+                }
+                if (data.length) {
+                    news.find({ 'fonte': "tjrj" }, (err, data) => {
+                        if (err) {
+                            console.log(err.message);
+                            return;
+                        }
+                        if (data.length) {
+                            const tituloArr = [];
+                            for (let noticia of data[0].noticias) {
+                                tituloArr.push(noticia.titulo);
+                            }
+                            for (let noticia of jsonRJ.noticias) {
+                                if (!tituloArr.includes(noticia.titulo)) {
+                                    data[0].noticias.push(noticia);
+                                    data[0].save();
+                                }
+                            }
+                        } else {
+                            n.save();
+                        }
+                    });
+                } else {
+                    n.save();
+                }
+            });
+            console.log("Dados RJ atualizados com sucesso!");
+        }catch(err){
+            console.log(`Erro na atualização de dados RJ: ${err.message}`)
+        }
     }
     static async getNewsJsonRJ() {
         try {
             //DESTRUCTURING DO OBJECT RECEBIDO PELO AXIOS
-            const { status, data } = await custom.connAxios(TJRJ_BASE_URL + NOTICE_BASE_URI); 
+            const { status, data } = await custom.connAxios(TJRJ_BASE_URL + NOTICE_BASE_URI);
             //CHECANDO SE O STATUS É 200
             if (status == 200) {
                 //CARREGANDO O CONTEÚDO RECEBIDO NO CHEERIO
@@ -120,9 +124,9 @@ class TJRJController {
                 });
                 //PEGANDO A IMAGEM DE UMA NOTÍCIA
                 $("div.conteudo img").toArray().map(img => {
-                    if(!custom.localizarPalavra(img.attribs.src.trim(), TJRJ_BASE_URL) && 
-                    custom.localizarPalavra(img.attribs.src.trim(), "/documents/")){
-                        imagens.push(TJRJ_BASE_URL+img.attribs.src.trim().substring(1));
+                    if (!custom.localizarPalavra(img.attribs.src.trim(), TJRJ_BASE_URL) &&
+                        custom.localizarPalavra(img.attribs.src.trim(), "/documents/")) {
+                        imagens.push(TJRJ_BASE_URL + img.attribs.src.trim().substring(1));
                         return;
                     }
                     imagens.push(img.attribs.src.trim());
